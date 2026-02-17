@@ -1,0 +1,418 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FigXed — Enhanced Theme Tokens
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+body:not(.figma-light):not(.figma-dark) {
+  --figma-color-bg: #ffffff;
+  --figma-color-bg-secondary: #f7f8fa;
+  --figma-color-bg-tertiary: #ebedf0;
+  --figma-color-bg-hover: #f0f2f5;
+  --figma-color-bg-selected: #e8f0fe;
+  --figma-color-text: #1a1a2e;
+  --figma-color-text-secondary: #5a5f73;
+  --figma-color-text-tertiary: #8e93a6;
+  --figma-color-border: #e4e6eb;
+  --figma-color-icon: #1a1a2e;
+  --figma-color-icon-secondary: #8e93a6;
+  --figma-color-bg-brand: #2d2d2d;
+  --figma-color-bg-brand-hover: #3a3a3a;
+  --figma-color-bg-success: #14ae5c;
+  --figma-color-bg-warning: #f2a20d;
+  --figma-color-bg-danger: #f24822;
+  --figma-color-text-danger: #dc3412;
+  --figma-color-text-warning: #b86200;
+  --figma-color-text-success: #009951;
+  --figma-color-text-brand: #404040;
+  --figma-color-bg-component: #9747ff;
+  --figma-color-text-component: #8638e5;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 12px;
+  color: var(--figma-color-text);
+  background-color: var(--figma-color-bg);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ═══ Scrollbar ═══════════════════════════════════════════════════════════ */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--figma-color-bg-tertiary);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--figma-color-text-tertiary);
+}
+
+/* ═══ Component Layer ═════════════════════════════════════════════════════ */
+
+@layer components {
+
+  /* ─── Buttons ──────────────────────────────────────────────────────── */
+
+  .btn-primary {
+    @apply bg-figma-brand text-white px-4 py-2 rounded-lg text-xs font-semibold
+           hover:bg-figma-brand-hover active:scale-[0.98] transition-all duration-150
+           cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed
+           disabled:active:scale-100;
+  }
+
+  .btn-secondary {
+    @apply bg-figma-bg-secondary text-figma-text px-4 py-2 rounded-lg text-xs
+           font-medium border border-figma-border hover:bg-figma-bg-hover
+           hover:border-[color-mix(in_srgb,var(--figma-color-border)_80%,var(--figma-color-text))]
+           active:scale-[0.98] transition-all duration-150 cursor-pointer;
+  }
+
+  .btn-ghost {
+    @apply text-figma-text-secondary px-2.5 py-1.5 rounded-lg text-xs
+           hover:bg-figma-bg-hover active:scale-[0.97] transition-all duration-150
+           cursor-pointer;
+  }
+
+  /* ─── Badges ──────────────────────────────────────────────────────── */
+
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-semibold tracking-wide;
+  }
+
+  .badge-error {
+    @apply badge;
+    background-color: color-mix(in srgb, var(--figma-color-bg-danger) 12%, var(--figma-color-bg));
+    color: var(--figma-color-text-danger, var(--figma-color-bg-danger));
+  }
+
+  .badge-warning {
+    @apply badge;
+    background-color: color-mix(in srgb, var(--figma-color-bg-warning) 12%, var(--figma-color-bg));
+    color: var(--figma-color-text-warning, var(--figma-color-bg-warning));
+  }
+
+  .badge-info {
+    @apply badge;
+    background-color: color-mix(in srgb, var(--figma-color-bg-brand) 12%, var(--figma-color-bg));
+    color: var(--figma-color-text-brand, var(--figma-color-bg-brand));
+  }
+
+  .badge-success {
+    @apply badge;
+    background-color: color-mix(in srgb, var(--figma-color-bg-success) 12%, var(--figma-color-bg));
+    color: var(--figma-color-text-success, var(--figma-color-bg-success));
+  }
+
+  /* ─── Category filter chips ────────────────────────────────────────── */
+
+  .chip-color {
+    background-color: color-mix(in srgb, var(--figma-color-bg-danger) 10%, var(--figma-color-bg));
+    color: var(--figma-color-text-danger, var(--figma-color-bg-danger));
+  }
+
+  .chip-spacing {
+    background-color: color-mix(in srgb, var(--figma-color-bg-warning) 10%, var(--figma-color-bg));
+    color: var(--figma-color-text-warning, var(--figma-color-bg-warning));
+  }
+
+  .chip-geometry {
+    background-color: color-mix(in srgb, var(--figma-color-bg-brand) 10%, var(--figma-color-bg));
+    color: var(--figma-color-text-brand, var(--figma-color-bg-brand));
+  }
+
+  .chip-typography {
+    background-color: color-mix(in srgb, var(--figma-color-bg-component) 10%, var(--figma-color-bg));
+    color: var(--figma-color-text-component, var(--figma-color-bg-component));
+  }
+
+  .chip-effects {
+    background-color: color-mix(in srgb, var(--figma-color-bg-component) 10%, var(--figma-color-bg));
+    color: var(--figma-color-text-component, var(--figma-color-bg-component));
+  }
+
+  .chip-layout {
+    background-color: var(--figma-color-bg-secondary);
+    color: var(--figma-color-text-secondary);
+  }
+
+  /* Severity chips */
+  .chip-severity-error {
+    background-color: color-mix(in srgb, var(--figma-color-bg-danger) 10%, var(--figma-color-bg));
+    color: var(--figma-color-text-danger, var(--figma-color-bg-danger));
+  }
+
+  .chip-severity-warning {
+    background-color: color-mix(in srgb, var(--figma-color-bg-warning) 10%, var(--figma-color-bg));
+    color: var(--figma-color-text-warning, var(--figma-color-bg-warning));
+  }
+
+  .chip-severity-info {
+    background-color: color-mix(in srgb, var(--figma-color-bg-brand) 10%, var(--figma-color-bg));
+    color: var(--figma-color-text-brand, var(--figma-color-bg-brand));
+  }
+
+  /* ─── Card ─────────────────────────────────────────────────────────── */
+
+  .card {
+    @apply bg-figma-bg border border-figma-border rounded-xl p-3.5;
+  }
+
+  /* ─── Notification ─────────────────────────────────────────────────── */
+
+  .notification-info {
+    background-color: color-mix(in srgb, #3B82F6 10%, var(--figma-color-bg));
+    border-color: color-mix(in srgb, #3B82F6 25%, transparent);
+    color: #2563EB;
+  }
+
+  .notification-success {
+    background-color: color-mix(in srgb, #16A34A 10%, var(--figma-color-bg));
+    border-color: color-mix(in srgb, #16A34A 25%, transparent);
+    color: #16A34A;
+  }
+
+  .notification-error {
+    background-color: color-mix(in srgb, #DC2626 10%, var(--figma-color-bg));
+    border-color: color-mix(in srgb, #DC2626 25%, transparent);
+    color: #DC2626;
+  }
+
+  /* ─── Health Score ─────────────────────────────────────────────────── */
+
+  .score-excellent,
+  .score-good {
+    background: linear-gradient(135deg,
+      color-mix(in srgb, var(--figma-color-bg-success) 8%, var(--figma-color-bg)),
+      color-mix(in srgb, var(--figma-color-bg-success) 4%, var(--figma-color-bg))
+    );
+    border-color: color-mix(in srgb, var(--figma-color-bg-success) 20%, transparent);
+  }
+
+  .score-excellent .score-value,
+  .score-good .score-value,
+  .score-excellent .score-badge,
+  .score-good .score-badge {
+    color: var(--figma-color-bg-success);
+  }
+
+  .score-needs-work {
+    background: linear-gradient(135deg,
+      color-mix(in srgb, var(--figma-color-bg-warning) 8%, var(--figma-color-bg)),
+      color-mix(in srgb, var(--figma-color-bg-warning) 4%, var(--figma-color-bg))
+    );
+    border-color: color-mix(in srgb, var(--figma-color-bg-warning) 20%, transparent);
+  }
+
+  .score-needs-work .score-value,
+  .score-needs-work .score-badge {
+    color: var(--figma-color-bg-warning);
+  }
+
+  .score-critical {
+    background: linear-gradient(135deg,
+      color-mix(in srgb, var(--figma-color-bg-danger) 8%, var(--figma-color-bg)),
+      color-mix(in srgb, var(--figma-color-bg-danger) 4%, var(--figma-color-bg))
+    );
+    border-color: color-mix(in srgb, var(--figma-color-bg-danger) 20%, transparent);
+  }
+
+  .score-critical .score-value,
+  .score-critical .score-badge {
+    color: var(--figma-color-bg-danger);
+  }
+
+  /* ─── Issue Card ───────────────────────────────────────────────────── */
+
+  .issue-icon-error { color: var(--figma-color-bg-danger); }
+  .issue-icon-warning { color: var(--figma-color-bg-warning); }
+  .issue-icon-info { color: var(--figma-color-bg-brand); }
+
+  .issue-suggestion-name {
+    color: var(--figma-color-bg-success);
+  }
+
+  .issue-category-badge {
+    @apply inline-flex items-center gap-0.5 px-1.5 py-px rounded-md text-2xs font-medium shrink-0;
+    background-color: var(--figma-color-bg-secondary);
+    color: var(--figma-color-text-secondary);
+  }
+
+  .issue-cat-color { color: var(--figma-color-bg-danger); }
+  .issue-cat-spacing { color: var(--figma-color-bg-warning); }
+  .issue-cat-geometry { color: var(--figma-color-bg-brand); }
+
+  .issue-btn-fix {
+    @apply inline-flex items-center gap-1 text-2xs px-2 py-1 rounded-md font-semibold
+           transition-all duration-150 cursor-pointer active:scale-[0.96];
+    background-color: var(--figma-color-bg-brand);
+    color: #fff;
+  }
+  .issue-btn-fix:hover {
+    background-color: var(--figma-color-bg-brand-hover);
+  }
+
+  .issue-btn-secondary {
+    @apply inline-flex items-center gap-1 text-2xs px-2 py-1 rounded-md font-medium
+           transition-all duration-150 cursor-pointer active:scale-[0.96];
+    background-color: var(--figma-color-bg-secondary);
+    color: var(--figma-color-text-secondary);
+  }
+  .issue-btn-secondary:hover {
+    background-color: var(--figma-color-bg-tertiary);
+  }
+
+  /* ─── Issue card animation ─────────────────────────────────────────── */
+
+  .issue-card {
+    animation: issue-slide-in 0.2s ease-out;
+  }
+
+  @keyframes issue-slide-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.25s ease-out;
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* ─── Filter chip ──────────────────────────────────────────────────── */
+
+  .filter-chip {
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-2xs font-semibold
+           transition-all duration-200 cursor-pointer select-none;
+    border: 1px solid transparent;
+  }
+
+  .filter-chip[data-active="true"] {
+    border-color: currentColor;
+    opacity: 1;
+  }
+
+  .filter-chip[data-active="false"] {
+    opacity: 0.35;
+    border-color: transparent;
+  }
+
+  .filter-chip:hover {
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+
+  .filter-chip:active {
+    transform: scale(0.96);
+  }
+
+  /* ─── Export menu ──────────────────────────────────────────────────── */
+
+  .export-menu-item {
+    @apply flex items-center gap-2.5 w-full px-3 py-2 text-xs text-figma-text
+           hover:bg-figma-bg-hover cursor-pointer transition-colors rounded-md mx-0;
+  }
+
+  /* ─── Section header ───────────────────────────────────────────────── */
+
+  .section-label {
+    @apply text-2xs font-semibold text-figma-text-secondary uppercase tracking-wider;
+  }
+
+  /* ─── Custom toggle switch ─────────────────────────────────────────── */
+
+  .toggle-switch {
+    @apply relative inline-flex items-center h-5 w-9 rounded-full cursor-pointer
+           transition-colors duration-200;
+    background-color: var(--figma-color-bg-tertiary);
+  }
+
+  .toggle-switch[data-checked="true"] {
+    background-color: var(--figma-color-bg-brand);
+  }
+
+  .toggle-switch .toggle-thumb {
+    @apply absolute w-3.5 h-3.5 rounded-full bg-white transition-transform duration-200;
+    left: 3px;
+  }
+
+  .toggle-switch[data-checked="true"] .toggle-thumb {
+    transform: translateX(16px);
+  }
+
+  /* ─── Spinner ──────────────────────────────────────────────────────── */
+
+  .spinner {
+    @apply rounded-full;
+    border: 2px solid var(--figma-color-bg-tertiary);
+    border-top-color: var(--figma-color-bg-brand);
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ─── Circular progress ────────────────────────────────────────────── */
+
+  .circular-progress-bg {
+    stroke: var(--figma-color-bg-tertiary);
+  }
+
+  .circular-progress-bar {
+    transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: rotate(-90deg);
+    transform-origin: center;
+  }
+
+  /* ─── Resize handle ──────────────────────────────────────────────── */
+
+  .resize-handle {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: nwse-resize;
+    color: var(--figma-color-text-tertiary);
+    z-index: 100;
+    user-select: none;
+    touch-action: none;
+    opacity: 0.5;
+    transition: opacity 0.15s;
+  }
+
+  .resize-handle:hover {
+    opacity: 1;
+  }
+}

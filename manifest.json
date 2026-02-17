@@ -1,0 +1,25 @@
+{
+  "name": "Figxed Design System Audit",
+  "id": "figxed-plugin",
+  "api": "1.0.0",
+  "main": "dist/code.js",
+  "ui": "dist/src/ui/index.html",
+  "capabilities": [],
+  "enableProposedApi": false,
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["none"]
+  },
+  "permissions": ["currentuser", "teamlibrary"],
+  "menu": [
+    { "name": "Open Panel", "command": "open" },
+    { "separator": true },
+    { "name": "Audit Selection", "command": "audit-selection" },
+    { "name": "Audit Page", "command": "audit-page" },
+    { "name": "Audit File", "command": "audit-file" }
+  ],
+  "relaunchButtons": [
+    { "command": "reaudit", "name": "Re-audit", "multipleSelection": true }
+  ]
+}
