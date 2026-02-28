@@ -88,6 +88,10 @@ interface AppState {
   selectAllPages: () => void;
   deselectAllPages: () => void;
 
+  // Help guide
+  showHelp: boolean;
+  setShowHelp: (v: boolean) => void;
+
   // Notifications
   notification: { message: string; type: 'info' | 'success' | 'error' } | null;
   setNotification: (n: { message: string; type: 'info' | 'success' | 'error' } | null) => void;
@@ -271,6 +275,10 @@ export const useStore = create<AppState>((set, get) => ({
   selectAllPages: () =>
     set((state) => ({ selectedPageIds: state.filePages.map((p) => p.id) })),
   deselectAllPages: () => set({ selectedPageIds: [] }),
+
+  // Help guide
+  showHelp: false,
+  setShowHelp: (v) => set({ showHelp: v }),
 
   // Notifications
   notification: null,

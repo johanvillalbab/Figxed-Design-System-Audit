@@ -43,7 +43,7 @@ export interface ScanOptions {
 export type IssueSeverity = 'error' | 'warning' | 'info';
 
 export const DEFAULT_CONFIG: PluginConfig = {
-  version: '1.0.0',
+  version: '2.0.0',
   audit: {
     enabledRules: [
       'padding-without-variable',

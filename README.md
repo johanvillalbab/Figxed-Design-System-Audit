@@ -1,8 +1,19 @@
 # Figxed Design System Audit
 
-**Design System Audit & Adoption Analytics for Figma**
+**v2.0 — Design System Audit & Adoption Analytics for Figma**
 
 Figxed is a Figma plugin that audits your designs against your Design System tokens (variables, styles) and provides adoption metrics. It detects hardcoded values, suggests the closest DS variable, and can auto-fix issues — all without leaving Figma.
+
+---
+
+## What's New in v2
+
+- **Library Detection** — Auto-detect all external libraries, explore components with instance counts, and locate any instance on the canvas
+- **Page Picker** — Select specific pages to scan on large files (200k+ nodes) instead of processing everything
+- **Built-in Help Guide** — Step-by-step visual guide accessible from the "Tips" button in the header
+- **Re-audit Scope Memory** — Re-auditing preserves your original scope (selection, page, or specific pages)
+- **Smoother Animations** — Refined transitions and easing across the entire UI
+- **Streamlined Navigation** — Settings accessible from the header icon; main tabs focused on Adoption, Audit, and Libraries
 
 ---
 
@@ -42,6 +53,11 @@ Figxed is a Figma plugin that audits your designs against your Design System tok
 - Scan options (ignore hidden layers, group detached, include text styles)
 - Preferences saved per-user via `clientStorage`, shared config via `pluginData`
 
+### Help Guide
+- Built-in step-by-step visual guide covering every feature
+- Sections: Start, Adoption, Audit, Libraries, and Pro-tips
+- Accessible from the "Tips" button in the header
+
 ---
 
 ## Architecture
@@ -59,7 +75,7 @@ src/
 └── ui/
     ├── App.tsx                # Root component with ErrorBoundary
     ├── tabs/                  # AuditTab, AdoptionTab, LibrariesTab, SettingsTab
-    ├── components/            # Reusable UI components
+    ├── components/            # HelpGuide, PagePicker, QuickActions, etc.
     ├── hooks/                 # Zustand store + message handling
     ├── utils/                 # Exporters (JSON, CSV, Markdown)
     └── styles/                # Tailwind + Figma theme tokens

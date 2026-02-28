@@ -6,6 +6,7 @@ import { TabBar } from './components/TabBar';
 import { ProgressBar } from './components/ProgressBar';
 import { Notification } from './components/Notification';
 import { ResizeHandle } from './components/ResizeHandle';
+import { HelpGuide } from './components/HelpGuide';
 import { AuditTab } from './tabs/AuditTab';
 import { AdoptionTab } from './tabs/AdoptionTab';
 import { LibrariesTab } from './tabs/LibrariesTab';
@@ -76,6 +77,7 @@ export function App() {
         </AnimatePresence>
 
         <ResizeHandle />
+        <HelpGuide />
       </div>
     </ErrorBoundary>
   );

@@ -343,6 +343,72 @@ function useFilteredLibraries(
     .filter(Boolean) as ScannedLibrary[];
 }
 
+// ─── Library Overview (empty state explainer) ────────────────────────────────
+
+function LibraryOverview() {
+  return (
+    <motion.div
+      className="rounded-xl border border-figma-border bg-figma-bg-secondary p-3.5"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
+    >
+      <div className="flex items-center gap-2.5 mb-3">
+        <div
+          className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+          style={{ backgroundColor: 'color-mix(in srgb, var(--figma-color-bg-component) 12%, var(--figma-color-bg))' }}
+        >
+          <Library size={16} style={{ color: 'var(--figma-color-bg-component)' }} />
+        </div>
+        <div>
+          <h3 className="text-xs font-bold text-figma-text">Library Detection</h3>
+          <p className="text-2xs text-figma-text-tertiary">Discover what powers your designs</p>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <OverviewItem
+          icon={<Package size={11} />}
+          text="Detect all external libraries used in your file"
+          delay={0.08}
+        />
+        <OverviewItem
+          icon={<Layers size={11} />}
+          text="See every component with instance counts and properties"
+          delay={0.14}
+        />
+        <OverviewItem
+          icon={<MousePointerClick size={11} />}
+          text="Locate any component instance directly on the canvas"
+          delay={0.2}
+        />
+      </div>
+    </motion.div>
+  );
+}
+
+function OverviewItem({ icon, text, delay }: { icon: React.ReactNode; text: string; delay: number }) {
+  return (
+    <motion.div
+      className="flex items-center gap-2"
+      initial={{ opacity: 0, x: -4 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay, duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
+    >
+      <span
+        className="w-5 h-5 rounded-md flex items-center justify-center shrink-0"
+        style={{
+          backgroundColor: 'color-mix(in srgb, var(--figma-color-bg-brand) 8%, var(--figma-color-bg))',
+          color: 'var(--figma-color-bg-brand)',
+        }}
+      >
+        {icon}
+      </span>
+      <span className="text-2xs text-figma-text-secondary leading-snug">{text}</span>
+    </motion.div>
+  );
+}
+
 // ─── Quick Actions for Libraries ─────────────────────────────────────────────
 
 function LibraryQuickActions({
@@ -459,6 +525,7 @@ export function LibrariesTab() {
     return (
       <>
         <div className="p-3.5 space-y-4">
+          <LibraryOverview />
           <LibraryQuickActions onScan={handleScan} onScanPages={handleScanPages} selectionCount={selectionCount} />
           <EmptyState
             icon={<ListTree size={28} />}
@@ -481,6 +548,7 @@ export function LibrariesTab() {
     return (
       <>
         <div className="p-3.5 space-y-4">
+          <LibraryOverview />
           <LibraryQuickActions onScan={handleScan} onScanPages={handleScanPages} selectionCount={selectionCount} />
           <EmptyState
             icon={<Package size={28} />}

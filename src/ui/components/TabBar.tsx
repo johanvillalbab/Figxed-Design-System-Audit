@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ClipboardCheck, BarChart3, Settings, Library } from 'lucide-react';
+import { ClipboardCheck, BarChart3, Library } from 'lucide-react';
 import type { TabId } from '../../types/common';
 
 interface TabBarProps {
@@ -12,7 +12,6 @@ const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
   { id: 'adoption', label: 'Adoption', icon: <BarChart3 size={14} /> },
   { id: 'audit', label: 'Audit', icon: <ClipboardCheck size={14} /> },
   { id: 'libraries', label: 'Libraries', icon: <Library size={14} /> },
-  { id: 'settings', label: 'Settings', icon: <Settings size={14} /> },
 ];
 
 export function TabBar({ activeTab, onTabChange }: TabBarProps) {
