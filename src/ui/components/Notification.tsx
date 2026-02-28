@@ -28,10 +28,10 @@ export function Notification({ message, type, position = 'bottom', onDismiss }: 
     <motion.div
       className={`fixed left-2.5 right-2.5 z-50 flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg text-xs font-medium shadow-lg border ${styleMap[type]}`}
       style={isTop ? { top: 96 } : { bottom: 24 }}
-      initial={{ opacity: 0, y: isTop ? -8 : 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: isTop ? -8 : 8 }}
-      transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+      initial={{ opacity: 0, y: isTop ? -10 : 10, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: isTop ? -6 : 6, scale: 0.97 }}
+      transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
     >
       <span className="shrink-0">{iconMap[type]}</span>
       <span className="flex-1 truncate">{message}</span>

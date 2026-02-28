@@ -1,5 +1,5 @@
 {
-  "name": "figxed-plugin",
+  "name": "figxed-design-system-audit",
   "version": "1.0.0",
   "description": "Design System Audit & Adoption Analytics for Figma",
   "type": "module",

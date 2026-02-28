@@ -1,15 +1,16 @@
-import type { AuditScope, ProgressPayload, ScanOptions } from './common';
+import type { AuditScope, ProgressPayload, ScanOptions, PageInfo } from './common';
 import type { AuditResult, FixResult, FixAllResult } from './audit';
 import type {
   AdoptionResult,
   LibraryInfo,
   DetectedLibrary,
   LoadedLibraryData,
+  LibraryScanResult,
 } from './adoption';
 
 // Messages from UI -> Plugin sandbox (code.ts)
 export type ToCodeMessage =
-  | { type: 'START_AUDIT'; payload: { scope: AuditScope } }
+  | { type: 'START_AUDIT'; payload: { scope: AuditScope; pageIds?: string[] } }
   | { type: 'FIX_ISSUE'; payload: { issueId: string } }
   | { type: 'FIX_ALL'; payload: { category: string } }
   | { type: 'IGNORE_ISSUE'; payload: { nodeId: string; ruleId: string } }
@@ -20,10 +21,12 @@ export type ToCodeMessage =
   | { type: 'EXPORT_DATA'; payload: { format: 'json' | 'csv' | 'md' } }
   | { type: 'GET_LIBRARIES' }
   | { type: 'DETECT_LIBRARIES' }
+  | { type: 'SCAN_LIBRARIES'; payload: { scope: AuditScope; pageIds?: string[] } }
   | { type: 'GET_CONFIG' }
   | { type: 'UPDATE_CONFIG'; payload: { path: string; value: unknown } }
   | { type: 'SAVE_USER_CONFIG'; payload: { path: string; value: unknown } }
   | { type: 'UI_READY' }
+  | { type: 'GET_FILE_PAGES' }
   // Library loading (source of truth) — scans the current file
   | { type: 'LOAD_LIBRARY_FROM_FILE' }
   | { type: 'UNLOAD_LIBRARY' }
@@ -40,6 +43,7 @@ export type ToUIMessage =
   | { type: 'PROGRESS_UPDATE'; payload: ProgressPayload }
   | { type: 'LIBRARIES_LIST'; payload: LibraryInfo[] }
   | { type: 'LIBRARIES_DETECTED'; payload: DetectedLibrary[] }
+  | { type: 'LIBRARY_SCAN_RESULTS'; payload: LibraryScanResult }
   | { type: 'CONFIG_DATA'; payload: Record<string, unknown> }
   | { type: 'USER_CONFIG_DATA'; payload: Record<string, unknown> }
   | { type: 'ERROR'; payload: { message: string; code?: string } }
@@ -47,6 +51,7 @@ export type ToUIMessage =
   | { type: 'PAGE_CHANGED'; payload: { pageName: string } }
   | { type: 'FILE_INFO'; payload: { fileName: string; pageName: string } }
   | { type: 'NOTIFY'; payload: { message: string; type: 'info' | 'success' | 'error' } }
+  | { type: 'FILE_PAGES_LIST'; payload: PageInfo[] }
   // Library loading (source of truth)
   | { type: 'LIBRARY_LOADED'; payload: LoadedLibraryData }
   | { type: 'LIBRARY_UNLOADED' };

@@ -1,8 +1,8 @@
-# FigXed
+# Figxed Design System Audit
 
 **Design System Audit & Adoption Analytics for Figma**
 
-FigXed is a Figma plugin that audits your designs against your Design System tokens (variables, styles) and provides adoption metrics. It detects hardcoded values, suggests the closest DS variable, and can auto-fix issues — all without leaving Figma.
+Figxed is a Figma plugin that audits your designs against your Design System tokens (variables, styles) and provides adoption metrics. It detects hardcoded values, suggests the closest DS variable, and can auto-fix issues — all without leaving Figma.
 
 ---
 
@@ -13,8 +13,15 @@ FigXed is a Figma plugin that audits your designs against your Design System tok
 - **Smart matching**: Finds the closest DS variable using perceptual color distance (Delta E CIE76) and numeric proximity
 - **Auto-fix**: One-click fix binds the suggested variable to the node property via `setBoundVariable()`
 - **Batch processing**: Handles large files (10k+ layers) with async batching and progress reporting
+- **Page picker**: Select specific pages to audit in large files instead of scanning everything
 - **Cross-page navigation**: Click any issue to jump to the affected node, even on a different page
 - **Library-aware**: Detects variables from team libraries, not just local variables
+
+### Library Detection
+- **Auto-detect**: Discovers all external libraries used in your file
+- **Component inventory**: Lists every remote component with instance counts and properties
+- **Library name resolution**: Resolves library names via team library API and variable tracing
+- **Locate on canvas**: Navigate to any component instance directly from the results
 
 ### Adoption Scanner
 - **Component tracking**: Classifies instances as DS (remote library), local/custom, or detached
@@ -35,13 +42,6 @@ FigXed is a Figma plugin that audits your designs against your Design System tok
 - Scan options (ignore hidden layers, group detached, include text styles)
 - Preferences saved per-user via `clientStorage`, shared config via `pluginData`
 
-### Polish
-- **Error Boundary**: Graceful recovery if the UI crashes
-- **Native notifications**: `figma.notify()` for audit results and bulk fixes
-- **Menu commands**: "Audit Selection", "Audit Page", "Audit File" accessible from the plugin menu
-- **Relaunch button**: Quick "Re-audit" button appears after your first audit
-- **Figma theming**: Full dark/light mode support via Figma's semantic CSS tokens
-
 ---
 
 ## Architecture
@@ -58,7 +58,7 @@ src/
 ├── types/                     # Shared TypeScript types
 └── ui/
     ├── App.tsx                # Root component with ErrorBoundary
-    ├── tabs/                  # AuditTab, AdoptionTab, SettingsTab
+    ├── tabs/                  # AuditTab, AdoptionTab, LibrariesTab, SettingsTab
     ├── components/            # Reusable UI components
     ├── hooks/                 # Zustand store + message handling
     ├── utils/                 # Exporters (JSON, CSV, Markdown)
@@ -82,16 +82,9 @@ src/
 ### Setup
 
 ```bash
-# Install dependencies
 npm install
-
-# Development (watch mode for both UI and sandbox)
-npm run dev
-
-# Production build
-npm run build
-
-# Type check
+npm run dev    # Watch mode
+npm run build  # Production build
 npm run typecheck
 ```
 
@@ -100,38 +93,15 @@ npm run typecheck
 1. Open Figma Desktop
 2. Go to **Plugins > Development > Import plugin from manifest...**
 3. Select the `manifest.json` file from this project
-4. The plugin will appear under **Plugins > Development > FigXed**
-
-### Project Structure
-
-| File | Purpose |
-|------|---------|
-| `manifest.json` | Plugin configuration (permissions, menu, relaunch) |
-| `vite.config.ts` | UI build config (React + single-file HTML) |
-| `vite.config.code.ts` | Sandbox build config (IIFE bundle) |
-| `tsconfig.json` | TypeScript config for UI |
-| `tsconfig.code.json` | TypeScript config for sandbox |
-| `tailwind.config.js` | Tailwind CSS with Figma theme tokens |
-
----
-
-## Publishing
-
-Before publishing to the Figma Community:
-
-1. **Get a real plugin ID**: In Figma Desktop, go to Plugins > Development > New Plugin. This generates a numeric ID.
-2. **Update `manifest.json`**: Replace `"id": "figxed-plugin"` with your numeric ID.
-3. **Update API version**: Consider updating `"api": "1.0.0"` to the latest version.
-4. **Prepare listing assets**: Cover image (1920x960), icon, description, and screenshots.
+4. The plugin will appear under **Plugins > Development > Figxed Design System Audit**
 
 ---
 
 ## Tech Stack
 
-- **UI**: React 18, TypeScript 5, Tailwind CSS 3, Zustand 4, Recharts 2, Lucide Icons
+- **UI**: React 18, TypeScript 5, Tailwind CSS 3, Zustand 4, Framer Motion, Lucide Icons
 - **Build**: Vite 5, vite-plugin-singlefile
 - **Plugin API**: @figma/plugin-typings
-- **Virtualization**: react-window v2
 
 ---
 

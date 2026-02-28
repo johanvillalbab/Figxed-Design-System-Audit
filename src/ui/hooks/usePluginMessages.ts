@@ -16,10 +16,13 @@ export function usePluginMessages(): void {
     setDetectedLibraries,
     setLoadedLibrary,
     setIsLoadingLibrary,
+    setLibraryScanResult,
+    setIsScanningLibraries,
     setIsAuditing,
     setIsScanning,
     setFileName,
     setPageName,
+    setFilePages,
   } = useStore();
 
   // Track notification timer to prevent memory leaks
@@ -101,6 +104,7 @@ export function usePluginMessages(): void {
           setIsAuditing(false);
           setIsScanning(false);
           setIsLoadingLibrary(false);
+          setIsScanningLibraries(false);
           scheduleNotifyClear(5000);
           break;
 
@@ -129,6 +133,15 @@ export function usePluginMessages(): void {
           setDetectedLibraries(msg.payload);
           break;
 
+        case 'LIBRARY_SCAN_RESULTS':
+          setLibraryScanResult(msg.payload);
+          setProgress(null);
+          break;
+
+        case 'FILE_PAGES_LIST':
+          setFilePages(msg.payload);
+          break;
+
         case 'LIBRARY_LOADED':
           setLoadedLibrary(msg.payload);
           setProgress(null);
@@ -154,7 +167,7 @@ export function usePluginMessages(): void {
       window.removeEventListener('message', handleMessage);
       clearNotifyTimer();
     };
-  }, [setAuditResult, setAdoptionResult, setProgress, setNotification, setSelection, setConfig, addFixedIssue, setDetectedLibraries, setLoadedLibrary, setIsLoadingLibrary, setIsAuditing, setIsScanning, setFileName, setPageName]);
+  }, [setAuditResult, setAdoptionResult, setProgress, setNotification, setSelection, setConfig, addFixedIssue, setDetectedLibraries, setLoadedLibrary, setIsLoadingLibrary, setLibraryScanResult, setIsScanningLibraries, setIsAuditing, setIsScanning, setFileName, setPageName, setFilePages]);
 }
 
 export function postToPlugin(message: unknown): void {

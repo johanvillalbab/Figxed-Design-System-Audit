@@ -1,8 +1,8 @@
 import { create } from 'zustand';
-import type { TabId, ProgressPayload, PluginConfig, AuditScope } from '../../types/common';
+import type { TabId, ProgressPayload, PluginConfig, AuditScope, PageInfo } from '../../types/common';
 import { DEFAULT_CONFIG } from '../../types/common';
 import type { AuditResult, AuditIssue, AuditCategory } from '../../types/audit';
-import type { AdoptionResult, DetectedLibrary, LoadedLibraryData } from '../../types/adoption';
+import type { AdoptionResult, DetectedLibrary, LoadedLibraryData, LibraryScanResult } from '../../types/adoption';
 import type { IssueSeverity } from '../../types/common';
 
 interface AppState {
@@ -64,6 +64,12 @@ interface AppState {
   isLoadingLibrary: boolean;
   setIsLoadingLibrary: (v: boolean) => void;
 
+  // Library scan (Detect Libraries feature)
+  libraryScanResult: LibraryScanResult | null;
+  setLibraryScanResult: (result: LibraryScanResult | null) => void;
+  isScanningLibraries: boolean;
+  setIsScanningLibraries: (v: boolean) => void;
+
   // Progress
   progress: ProgressPayload | null;
   setProgress: (p: ProgressPayload | null) => void;
@@ -73,6 +79,14 @@ interface AppState {
   pageName: string;
   setFileName: (name: string) => void;
   setPageName: (name: string) => void;
+
+  // File pages (for page picker)
+  filePages: PageInfo[];
+  setFilePages: (pages: PageInfo[]) => void;
+  selectedPageIds: string[];
+  togglePageSelection: (pageId: string) => void;
+  selectAllPages: () => void;
+  deselectAllPages: () => void;
 
   // Notifications
   notification: { message: string; type: 'info' | 'success' | 'error' } | null;
@@ -228,6 +242,12 @@ export const useStore = create<AppState>((set, get) => ({
   isLoadingLibrary: false,
   setIsLoadingLibrary: (v) => set({ isLoadingLibrary: v }),
 
+  // Library scan (Detect Libraries)
+  libraryScanResult: null,
+  setLibraryScanResult: (result) => set({ libraryScanResult: result, isScanningLibraries: false }),
+  isScanningLibraries: false,
+  setIsScanningLibraries: (v) => set({ isScanningLibraries: v }),
+
   // Progress
   progress: null,
   setProgress: (p) => set({ progress: p }),
@@ -237,6 +257,20 @@ export const useStore = create<AppState>((set, get) => ({
   pageName: '',
   setFileName: (name) => set({ fileName: name }),
   setPageName: (name) => set({ pageName: name }),
+
+  // File pages (for page picker)
+  filePages: [],
+  setFilePages: (pages) => set({ filePages: pages, selectedPageIds: pages.map((p) => p.id) }),
+  selectedPageIds: [],
+  togglePageSelection: (pageId) =>
+    set((state) => ({
+      selectedPageIds: state.selectedPageIds.includes(pageId)
+        ? state.selectedPageIds.filter((id) => id !== pageId)
+        : [...state.selectedPageIds, pageId],
+    })),
+  selectAllPages: () =>
+    set((state) => ({ selectedPageIds: state.filePages.map((p) => p.id) })),
+  deselectAllPages: () => set({ selectedPageIds: [] }),
 
   // Notifications
   notification: null,

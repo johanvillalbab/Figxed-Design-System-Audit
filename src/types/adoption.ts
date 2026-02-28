@@ -66,6 +66,44 @@ export interface DetectedLibrary {
   enabled: boolean;
 }
 
+// ─── Library Scan (Detect Libraries) ──────────────────────────────────────────
+
+export interface LibraryScanResult {
+  libraries: ScannedLibrary[];
+  scanInfo: LibraryScanInfo;
+}
+
+export interface LibraryScanInfo {
+  scope: string;
+  totalNodes: number;
+  totalInstances: number;
+  duration: number;
+  timestamp: number;
+}
+
+export interface ScannedLibrary {
+  id: string;
+  name: string;
+  components: ScannedComponent[];
+  totalInstances: number;
+}
+
+export interface ScannedComponent {
+  key: string;
+  name: string;
+  libraryName: string;
+  instanceCount: number;
+  /** Node IDs of instances (capped for navigation) */
+  instanceNodeIds: string[];
+  properties: ScannedComponentProperty[];
+}
+
+export interface ScannedComponentProperty {
+  name: string;
+  type: string;
+  values: string[];
+}
+
 // ─── Loaded Library (Source of Truth) ─────────────────────────────────────────
 
 export interface LoadedVariableInfo {

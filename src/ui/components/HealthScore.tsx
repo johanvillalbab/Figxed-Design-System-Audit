@@ -20,7 +20,7 @@ function CircularProgress({ score, color, size = 80 }: { score: number; color: s
   const offset = circumference - (animatedScore / 100) * circumference;
 
   useEffect(() => {
-    const timer = setTimeout(() => setAnimatedScore(score), 100);
+    const timer = setTimeout(() => setAnimatedScore(score), 200);
     return () => clearTimeout(timer);
   }, [score]);
 
@@ -52,9 +52,9 @@ function CircularProgress({ score, color, size = 80 }: { score: number; color: s
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <motion.span
           className="text-xl font-bold score-value"
-          initial={{ opacity: 0, scale: 0.5 }}
+          initial={{ opacity: 0, scale: 0.7 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3, type: 'spring', stiffness: 300, damping: 20 }}
+          transition={{ delay: 0.4, duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
         >
           {score}%
         </motion.span>
@@ -70,7 +70,7 @@ export function HealthScore({ score }: HealthScoreProps) {
         className="card bg-figma-bg-secondary text-center py-5"
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
       >
         <div className="flex flex-col items-center gap-2">
           <div className="w-14 h-14 rounded-full bg-figma-bg-tertiary flex items-center justify-center">
@@ -91,16 +91,16 @@ export function HealthScore({ score }: HealthScoreProps) {
       className={`card border text-center py-4 ${info.className}`}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35 }}
+      transition={{ duration: 0.45, ease: [0.32, 0.72, 0, 1] }}
     >
       <p className="section-label mb-2">File Health</p>
       <div className="flex flex-col items-center gap-2">
         <CircularProgress score={score} color={info.color} />
         <motion.span
           className="badge score-badge"
-          initial={{ opacity: 0, scale: 0.8 }}
+          initial={{ opacity: 0, scale: 0.85 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: 0.6, duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
         >
           {info.label}
         </motion.span>

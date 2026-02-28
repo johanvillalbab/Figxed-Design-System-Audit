@@ -126,7 +126,7 @@ export class AdoptionScanner {
     // Process in batches
     for (let i = 0; i < allNodes.length; i += BATCH_SIZE) {
       const batch = allNodes.slice(i, i + BATCH_SIZE);
-      this.processBatch(batch, ctx);
+      await this.processBatch(batch, ctx);
 
       onProgress?.(Math.min(i + BATCH_SIZE, allNodes.length), allNodes.length);
 
@@ -172,24 +172,21 @@ export class AdoptionScanner {
 
   // ─── Batch Processing ─────────────────────────────────────────────────
 
-  private processBatch(nodes: SceneNode[], ctx: ScanContext): void {
+  private async processBatch(nodes: SceneNode[], ctx: ScanContext): Promise<void> {
     for (const node of nodes) {
-      this.classifyNode(node, ctx);
+      await this.classifyNode(node, ctx);
     }
   }
 
-  private classifyNode(node: SceneNode, ctx: ScanContext): void {
+  private async classifyNode(node: SceneNode, ctx: ScanContext): Promise<void> {
     // 1. Component instance classification
     if (node.type === 'INSTANCE') {
-      this.classifyInstance(node, ctx);
-      // Library instances: their internal properties are controlled by
-      // the library, so skip color/spacing/radius/text checks to avoid
-      // false positives.
+      await this.classifyInstance(node, ctx);
       try {
-        const mc = node.mainComponent;
+        const mc = await node.getMainComponentAsync();
         if (mc && this.isLibraryComponent(mc)) return;
       } catch {
-        // mainComponent can throw — fall through to checks below
+        // getMainComponentAsync can throw — fall through to checks below
       }
     }
 
@@ -247,12 +244,12 @@ export class AdoptionScanner {
     return false;
   }
 
-  private classifyInstance(node: InstanceNode, ctx: ScanContext): void {
+  private async classifyInstance(node: InstanceNode, ctx: ScanContext): Promise<void> {
     let mainComp: ComponentNode | null = null;
     try {
-      mainComp = node.mainComponent;
+      mainComp = await node.getMainComponentAsync();
     } catch {
-      // mainComponent can throw if the component is in a library that's not loaded
+      // getMainComponentAsync can throw if the component is unavailable
     }
 
     if (!mainComp) {

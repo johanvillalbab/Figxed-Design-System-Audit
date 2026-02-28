@@ -22,7 +22,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    console.error('[FigXed] UI Error:', error, errorInfo);
+    console.error('[Figxed] UI Error:', error, errorInfo);
   }
 
   handleReload = () => {

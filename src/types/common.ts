@@ -1,6 +1,11 @@
-export type TabId = 'audit' | 'adoption' | 'settings';
+export type TabId = 'audit' | 'adoption' | 'libraries' | 'settings';
 
-export type AuditScope = 'selection' | 'page' | 'file';
+export type AuditScope = 'selection' | 'page' | 'file' | 'pages';
+
+export interface PageInfo {
+  id: string;
+  name: string;
+}
 
 export interface ProgressPayload {
   current: number;

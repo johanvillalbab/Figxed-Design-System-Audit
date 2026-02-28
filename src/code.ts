@@ -11,6 +11,10 @@ import type {
   LoadedComponentInfo,
   LoadedStyleInfo,
   LoadedLibrarySummary,
+  LibraryScanResult,
+  ScannedLibrary,
+  ScannedComponent,
+  ScannedComponentProperty,
 } from './types/adoption';
 import { AuditEngine } from './audit/engine';
 import { AdoptionScanner } from './analyzer/adoptionScanner';
@@ -32,6 +36,9 @@ figma.showUI(__html__, {
 
 let isScanning = false;
 let auditEngine: AuditEngine | null = null;
+let lastAuditScope: 'selection' | 'page' | 'file' | 'pages' = 'page';
+let lastSelectionNodeIds: string[] = [];
+let lastSelectedPageIds: string[] = [];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -65,7 +72,7 @@ function handleCommand(cmd: string): void {
       triggerAudit('file');
       break;
     case 'reaudit':
-      triggerAudit('page');
+      triggerAudit(lastAuditScope);
       break;
     default:
       break;
@@ -73,25 +80,62 @@ function handleCommand(cmd: string): void {
 }
 
 /** Trigger an audit programmatically (from menu/relaunch command) */
-async function triggerAudit(scope: 'selection' | 'page' | 'file'): Promise<void> {
+async function triggerAudit(scope: 'selection' | 'page' | 'file' | 'pages', pageIds?: string[]): Promise<void> {
   if (isScanning) return;
 
   isScanning = true;
+  lastAuditScope = scope;
+  if (pageIds) lastSelectedPageIds = pageIds;
+
   try {
     let nodes: SceneNode[] = [];
 
     switch (scope) {
-      case 'selection':
+      case 'selection': {
         nodes = [...figma.currentPage.selection];
+        if (nodes.length === 0 && lastSelectionNodeIds.length > 0) {
+          for (const id of lastSelectionNodeIds) {
+            const node = await figma.getNodeByIdAsync(id);
+            if (node && node.type !== 'DOCUMENT' && node.type !== 'PAGE') {
+              nodes.push(node as SceneNode);
+            }
+          }
+        }
         if (nodes.length === 0) {
           notifyNative('No elements selected');
           isScanning = false;
           return;
         }
+        lastSelectionNodeIds = nodes.map((n) => n.id);
         break;
+      }
       case 'page':
         nodes = [...figma.currentPage.children];
         break;
+      case 'pages': {
+        const targetIds = pageIds ?? lastSelectedPageIds;
+        if (targetIds.length === 0) {
+          notifyNative('No pages selected');
+          isScanning = false;
+          return;
+        }
+        const allPages = figma.root.children;
+        const selectedPages = allPages.filter((p) => targetIds.includes(p.id));
+        for (let i = 0; i < selectedPages.length; i++) {
+          const pg = selectedPages[i];
+          postToUI({
+            type: 'PROGRESS_UPDATE',
+            payload: {
+              current: i,
+              total: selectedPages.length,
+              label: `Loading page "${pg.name}" (${i + 1}/${selectedPages.length})...`,
+            },
+          });
+          await pg.loadAsync();
+          nodes.push(...pg.children);
+        }
+        break;
+      }
       case 'file': {
         const pages = figma.root.children;
         for (let i = 0; i < pages.length; i++) {
@@ -194,14 +238,13 @@ async function detectLibraries(): Promise<DetectedLibrary[]> {
 
     if (node.type === 'INSTANCE') {
       try {
-        const mc = node.mainComponent;
+        const mc = await node.getMainComponentAsync();
         if (mc && mc.remote) {
-          // Group by key prefix — components from the same library share a prefix
           const keyPrefix = mc.key.split(':')[0];
           keyPrefixCounts.set(keyPrefix, (keyPrefixCounts.get(keyPrefix) ?? 0) + 1);
         }
       } catch {
-        // mainComponent can throw
+        // getMainComponentAsync can throw for deleted/unavailable components
       }
     }
 
@@ -330,6 +373,363 @@ async function detectLibraries(): Promise<DetectedLibrary[]> {
   }
 
   return Array.from(libraryMap.values());
+}
+
+// ─── Deep Library Scan (Detect Libraries) ────────────────────────────────────
+// Walks the node tree, groups INSTANCE nodes by their source library,
+// and for each component collects variant/component properties and their values.
+//
+// Library origin detection strategy:
+// 1. For each remote INSTANCE, access mainComponent to read its key
+// 2. Group components by their key prefix (file-level identifier)
+// 3. Resolve library names using:
+//    a) teamLibrary API (variable collections carry the libraryName)
+//    b) Cross-referencing key prefixes from variable collections with component keys
+//    c) Component name hierarchy analysis (common "/" prefix)
+//    d) Fallback to numbered external library names
+
+/** Extract the file-level fingerprint from a component or collection key.
+ *  Variable collection keys look like "VariableCollectionId:HASH/localId:mode"
+ *  while component keys look like "HASH:nodeId" or just "HASH".
+ *  Both embed a long hex file hash — we extract that for reliable matching. */
+function extractKeyFingerprint(key: string): string {
+  const hexMatch = key.match(/[a-f0-9]{20,}/i);
+  if (hexMatch) return hexMatch[0].toLowerCase();
+
+  for (const sep of [';', ':', '/']) {
+    const idx = key.indexOf(sep);
+    if (idx > 4) return key.substring(0, idx);
+  }
+  return key;
+}
+
+/** Find the longest common "/" prefix among component names (e.g. "DS / Button", "DS / Card" → "DS"). */
+function inferLibraryNameFromComponents(
+  names: string[],
+): string | null {
+  if (names.length === 0) return null;
+
+  // Extract root segments (before the first "/")
+  const roots = names.map((n) => {
+    const slashIdx = n.indexOf('/');
+    return slashIdx > 0 ? n.substring(0, slashIdx).trim() : null;
+  });
+
+  // Check if at least 60% share the same root prefix
+  const rootCounts = new Map<string, number>();
+  for (const r of roots) {
+    if (r) rootCounts.set(r, (rootCounts.get(r) ?? 0) + 1);
+  }
+
+  let bestRoot: string | null = null;
+  let bestCount = 0;
+  for (const [root, count] of rootCounts) {
+    if (count > bestCount) {
+      bestRoot = root;
+      bestCount = count;
+    }
+  }
+
+  if (bestRoot && bestCount >= names.length * 0.5) {
+    return bestRoot;
+  }
+  return null;
+}
+
+async function scanLibraries(
+  scope: 'selection' | 'page' | 'file' | 'pages',
+  pageIds?: string[],
+): Promise<LibraryScanResult> {
+  const startTime = Date.now();
+
+  // ── 0. Collect nodes from the requested scope ────────────────────────
+  let nodes: SceneNode[] = [];
+  switch (scope) {
+    case 'selection':
+      nodes = [...figma.currentPage.selection];
+      break;
+    case 'page':
+      nodes = [...figma.currentPage.children];
+      break;
+    case 'pages': {
+      const targetIds = pageIds ?? [];
+      const allPages = figma.root.children;
+      const selectedPages = allPages.filter((p) => targetIds.includes(p.id));
+      for (let i = 0; i < selectedPages.length; i++) {
+        const pg = selectedPages[i];
+        postToUI({
+          type: 'PROGRESS_UPDATE',
+          payload: {
+            current: i,
+            total: selectedPages.length,
+            label: `Loading page "${pg.name}" (${i + 1}/${selectedPages.length})...`,
+          },
+        });
+        await pg.loadAsync();
+        nodes.push(...pg.children);
+      }
+      break;
+    }
+    case 'file': {
+      const pages = figma.root.children;
+      for (let i = 0; i < pages.length; i++) {
+        const pg = pages[i];
+        postToUI({
+          type: 'PROGRESS_UPDATE',
+          payload: {
+            current: i,
+            total: pages.length,
+            label: `Loading page "${pg.name}" (${i + 1}/${pages.length})...`,
+          },
+        });
+        await pg.loadAsync();
+        nodes.push(...pg.children);
+      }
+      break;
+    }
+  }
+
+  // ── 1. Build fingerprint → libraryName map from team library API ─────
+  // Variable collections carry a .libraryName — we extract the key
+  // fingerprint from each collection key so we can cross-reference later.
+  const fingerprintToLibName = new Map<string, string>();
+  const knownLibNames = new Set<string>();
+
+  try {
+    const varCollections =
+      await figma.teamLibrary.getAvailableLibraryVariableCollectionsAsync();
+    for (const col of varCollections) {
+      const fp = extractKeyFingerprint(col.key);
+      fingerprintToLibName.set(fp, col.libraryName);
+      knownLibNames.add(col.libraryName);
+    }
+  } catch {
+    // teamLibrary API not available (e.g. personal files)
+  }
+
+  // ── 2. Walk the node tree, collect remote instances ──────────────────
+  // fingerprint → componentKey → { name, key, instances }
+  const libGroups = new Map<
+    string,
+    Map<string, { name: string; key: string; instances: InstanceNode[] }>
+  >();
+
+  let totalNodes = 0;
+  let totalInstances = 0;
+
+  const stack: SceneNode[] = [...nodes];
+  const BATCH_SIZE = 800;
+  let processed = 0;
+
+  while (stack.length > 0) {
+    const node = stack.pop()!;
+    totalNodes++;
+    processed++;
+
+    if (processed % BATCH_SIZE === 0) {
+      postToUI({
+        type: 'PROGRESS_UPDATE',
+        payload: {
+          current: processed,
+          total: processed + stack.length,
+          label: `Scanning nodes... (${processed} processed)`,
+        },
+      });
+      await new Promise((r) => setTimeout(r, 0));
+    }
+
+    if (node.type === 'INSTANCE') {
+      totalInstances++;
+      try {
+        const mc = await node.getMainComponentAsync();
+        if (mc && mc.remote) {
+          const parent = mc.parent;
+          const isVariant = parent?.type === 'COMPONENT_SET';
+          const compKey = isVariant ? parent.key : mc.key;
+          const compName = isVariant ? parent.name : mc.name;
+
+          const fingerprint = extractKeyFingerprint(mc.key);
+
+          if (!libGroups.has(fingerprint)) {
+            libGroups.set(fingerprint, new Map());
+          }
+          const compMap = libGroups.get(fingerprint)!;
+          if (!compMap.has(compKey)) {
+            compMap.set(compKey, { name: compName, key: compKey, instances: [] });
+          }
+          compMap.get(compKey)!.instances.push(node);
+        }
+      } catch {
+        // getMainComponentAsync can throw for deleted/unavailable components
+      }
+    }
+
+    // Recurse into ALL children (including instances — their children may also use library components)
+    if ('children' in node) {
+      for (let i = (node as FrameNode).children.length - 1; i >= 0; i--) {
+        stack.push((node as FrameNode).children[i] as SceneNode);
+      }
+    }
+  }
+
+  // ── 2b. Build collectionKey → libraryName map for bound-variable resolution
+  const collectionKeyToLibName = new Map<string, string>();
+  try {
+    const teamCols =
+      await figma.teamLibrary.getAvailableLibraryVariableCollectionsAsync();
+    for (const tc of teamCols) {
+      collectionKeyToLibName.set(tc.key, tc.libraryName);
+    }
+  } catch {
+    // already attempted above — ignore
+  }
+
+  // ── 3. Resolve library names for each fingerprint group ──────────────
+  const libraries: ScannedLibrary[] = [];
+  let externalIdx = 0;
+
+  for (const [fingerprint, compMap] of libGroups) {
+    // Strategy A: Direct fingerprint match against team library API
+    let resolvedName = fingerprintToLibName.get(fingerprint);
+
+    // Strategy B: Trace bound variables on instances back to a library name
+    if (!resolvedName && collectionKeyToLibName.size > 0) {
+      const sampleInstances = Array.from(compMap.values())
+        .flatMap((c) => c.instances)
+        .slice(0, 5);
+
+      for (const inst of sampleInstances) {
+        if (resolvedName) break;
+        try {
+          const bv = inst.boundVariables;
+          if (!bv) continue;
+          const aliases: VariableAlias[] = [];
+          for (const val of Object.values(bv)) {
+            if (Array.isArray(val)) {
+              for (const v of val) {
+                if (v && typeof v === 'object' && 'id' in v) aliases.push(v as VariableAlias);
+              }
+            } else if (val && typeof val === 'object' && 'id' in (val as Record<string, unknown>)) {
+              aliases.push(val as VariableAlias);
+            }
+          }
+          for (const alias of aliases) {
+            if (resolvedName) break;
+            try {
+              const variable = await figma.variables.getVariableByIdAsync(alias.id);
+              if (!variable) continue;
+              const col = await figma.variables.getVariableCollectionByIdAsync(
+                variable.variableCollectionId,
+              );
+              if (col && col.remote && col.key) {
+                const libName = collectionKeyToLibName.get(col.key);
+                if (libName) resolvedName = libName;
+              }
+            } catch {
+              // variable resolution can fail
+            }
+          }
+        } catch {
+          // boundVariables access can fail
+        }
+      }
+    }
+
+    // Strategy C: Infer from component naming conventions (e.g. "MyDS / Button")
+    if (!resolvedName) {
+      const compNames = Array.from(compMap.values()).map((c) => c.name);
+      resolvedName = inferLibraryNameFromComponents(compNames) ?? undefined;
+    }
+
+    // Strategy D: If only one known library exists and one fingerprint group, assume match
+    if (!resolvedName && knownLibNames.size === 1 && libGroups.size === 1) {
+      resolvedName = knownLibNames.values().next().value as string;
+    }
+
+    // Strategy E: Fallback
+    if (!resolvedName) {
+      externalIdx++;
+      resolvedName =
+        externalIdx === 1 && libGroups.size === 1
+          ? 'External Library'
+          : `External Library ${externalIdx}`;
+    }
+
+    // ── Build component list with properties ──────────────────────────
+    const components: ScannedComponent[] = [];
+
+    for (const [, compData] of compMap) {
+      const propsMap = new Map<
+        string,
+        { type: string; values: Set<string> }
+      >();
+
+      for (const inst of compData.instances) {
+        try {
+          const cpDefs = inst.componentProperties;
+          if (cpDefs) {
+            for (const [propName, propDef] of Object.entries(cpDefs)) {
+              if (!propsMap.has(propName)) {
+                propsMap.set(propName, {
+                  type: propDef.type,
+                  values: new Set(),
+                });
+              }
+              const entry = propsMap.get(propName)!;
+              const val = String(propDef.value);
+              if (entry.values.size < 50) {
+                entry.values.add(val);
+              }
+            }
+          }
+        } catch {
+          // componentProperties access can throw
+        }
+      }
+
+      const properties: ScannedComponentProperty[] = [];
+      for (const [propName, propData] of propsMap) {
+        properties.push({
+          name: propName,
+          type: propData.type,
+          values: Array.from(propData.values).sort(),
+        });
+      }
+      properties.sort((a, b) => a.name.localeCompare(b.name));
+
+      const MAX_STORED_IDS = 20;
+      components.push({
+        key: compData.key,
+        name: compData.name,
+        libraryName: resolvedName,
+        instanceCount: compData.instances.length,
+        instanceNodeIds: compData.instances.slice(0, MAX_STORED_IDS).map((i) => i.id),
+        properties,
+      });
+    }
+
+    components.sort((a, b) => b.instanceCount - a.instanceCount);
+
+    libraries.push({
+      id: `lib_${fingerprint}`,
+      name: resolvedName,
+      components,
+      totalInstances: components.reduce((s, c) => s + c.instanceCount, 0),
+    });
+  }
+
+  libraries.sort((a, b) => b.totalInstances - a.totalInstances);
+
+  return {
+    libraries,
+    scanInfo: {
+      scope,
+      totalNodes,
+      totalInstances,
+      duration: Date.now() - startTime,
+      timestamp: Date.now(),
+    },
+  };
 }
 
 // ─── Library Loading (Source of Truth) ────────────────────────────────────────
@@ -655,7 +1055,13 @@ figma.ui.onmessage = async (msg: ToCodeMessage) => {
       }
 
       case 'START_AUDIT': {
-        await triggerAudit(msg.payload.scope);
+        await triggerAudit(msg.payload.scope, msg.payload.pageIds);
+        break;
+      }
+
+      case 'GET_FILE_PAGES': {
+        const pages = figma.root.children.map((p) => ({ id: p.id, name: p.name }));
+        postToUI({ type: 'FILE_PAGES_LIST', payload: pages });
         break;
       }
 
@@ -806,6 +1212,43 @@ figma.ui.onmessage = async (msg: ToCodeMessage) => {
           postToUI({ type: 'LIBRARIES_DETECTED', payload: detectedLibs });
         } catch {
           postToUI({ type: 'LIBRARIES_DETECTED', payload: [] });
+        }
+        break;
+      }
+
+      case 'SCAN_LIBRARIES': {
+        if (isScanning) {
+          notifyUI('A scan is already in progress', 'error');
+          return;
+        }
+        isScanning = true;
+        try {
+          const libScanScope = msg.payload.scope;
+          const libPageIds = msg.payload.pageIds;
+          if (libScanScope === 'selection' && figma.currentPage.selection.length === 0) {
+            notifyUI('No elements selected. Select layers to scan.', 'error');
+            isScanning = false;
+            return;
+          }
+          if (libScanScope === 'pages' && (!libPageIds || libPageIds.length === 0)) {
+            notifyUI('No pages selected.', 'error');
+            isScanning = false;
+            return;
+          }
+          const scanResult = await scanLibraries(libScanScope, libPageIds);
+          postToUI({ type: 'LIBRARY_SCAN_RESULTS', payload: scanResult });
+
+          const libCount = scanResult.libraries.length;
+          const compCount = scanResult.libraries.reduce((s, l) => s + l.components.length, 0);
+          notifyUI(
+            `Found ${libCount} ${libCount === 1 ? 'library' : 'libraries'} with ${compCount} components (${scanResult.scanInfo.totalInstances} instances)`,
+            'success',
+          );
+        } catch (err) {
+          const errMsg = err instanceof Error ? err.message : 'Library scan failed';
+          postToUI({ type: 'ERROR', payload: { message: errMsg } });
+        } finally {
+          isScanning = false;
         }
         break;
       }

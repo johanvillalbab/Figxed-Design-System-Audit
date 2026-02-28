@@ -8,19 +8,20 @@ import { Notification } from './components/Notification';
 import { ResizeHandle } from './components/ResizeHandle';
 import { AuditTab } from './tabs/AuditTab';
 import { AdoptionTab } from './tabs/AdoptionTab';
+import { LibrariesTab } from './tabs/LibrariesTab';
 import { SettingsTab } from './tabs/SettingsTab';
 import { useStore } from './hooks/useStore';
 import { usePluginMessages, postToPlugin } from './hooks/usePluginMessages';
 
 const pageVariants = {
-  initial: { opacity: 0, y: 6 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -6 },
+  initial: { opacity: 0, y: 8, filter: 'blur(2px)' },
+  animate: { opacity: 1, y: 0, filter: 'blur(0px)' },
+  exit: { opacity: 0, y: -4, filter: 'blur(2px)' },
 };
 
 const pageTransition = {
-  duration: 0.2,
-  ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
+  duration: 0.3,
+  ease: [0.32, 0.72, 0, 1] as [number, number, number, number],
 };
 
 export function App() {
@@ -55,6 +56,7 @@ export function App() {
             >
               {activeTab === 'audit' && <AuditTab />}
               {activeTab === 'adoption' && <AdoptionTab />}
+              {activeTab === 'libraries' && <LibrariesTab />}
               {activeTab === 'settings' && <SettingsTab />}
             </motion.div>
           </AnimatePresence>

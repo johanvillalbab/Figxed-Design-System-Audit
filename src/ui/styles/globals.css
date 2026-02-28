@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   FigXed — Enhanced Theme Tokens
+   Figxed Design System Audit — Theme Tokens
    ═══════════════════════════════════════════════════════════════════════════ */
 
 body:not(.figma-light):not(.figma-dark) {
@@ -74,22 +74,24 @@ body {
 
   .btn-primary {
     @apply bg-figma-brand text-white px-4 py-2 rounded-lg text-xs font-semibold
-           hover:bg-figma-brand-hover active:scale-[0.98] transition-all duration-150
+           hover:bg-figma-brand-hover active:scale-[0.98]
            cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed
            disabled:active:scale-100;
+    transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
   }
 
   .btn-secondary {
     @apply bg-figma-bg-secondary text-figma-text px-4 py-2 rounded-lg text-xs
            font-medium border border-figma-border hover:bg-figma-bg-hover
            hover:border-[color-mix(in_srgb,var(--figma-color-border)_80%,var(--figma-color-text))]
-           active:scale-[0.98] transition-all duration-150 cursor-pointer;
+           active:scale-[0.98] cursor-pointer;
+    transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
   }
 
   .btn-ghost {
     @apply text-figma-text-secondary px-2.5 py-1.5 rounded-lg text-xs
-           hover:bg-figma-bg-hover active:scale-[0.97] transition-all duration-150
-           cursor-pointer;
+           hover:bg-figma-bg-hover active:scale-[0.98] cursor-pointer;
+    transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
   }
 
   /* ─── Badges ──────────────────────────────────────────────────────── */
@@ -262,9 +264,10 @@ body {
 
   .issue-btn-fix {
     @apply inline-flex items-center gap-1 text-2xs px-2 py-1 rounded-md font-semibold
-           transition-all duration-150 cursor-pointer active:scale-[0.96];
+           cursor-pointer active:scale-[0.97];
     background-color: var(--figma-color-bg-brand);
     color: #fff;
+    transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
   }
   .issue-btn-fix:hover {
     background-color: var(--figma-color-bg-brand-hover);
@@ -272,9 +275,10 @@ body {
 
   .issue-btn-secondary {
     @apply inline-flex items-center gap-1 text-2xs px-2 py-1 rounded-md font-medium
-           transition-all duration-150 cursor-pointer active:scale-[0.96];
+           cursor-pointer active:scale-[0.97];
     background-color: var(--figma-color-bg-secondary);
     color: var(--figma-color-text-secondary);
+    transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
   }
   .issue-btn-secondary:hover {
     background-color: var(--figma-color-bg-tertiary);
@@ -283,13 +287,13 @@ body {
   /* ─── Issue card animation ─────────────────────────────────────────── */
 
   .issue-card {
-    animation: issue-slide-in 0.2s ease-out;
+    animation: issue-slide-in 0.35s cubic-bezier(0.32, 0.72, 0, 1);
   }
 
   @keyframes issue-slide-in {
     from {
       opacity: 0;
-      transform: translateY(-4px);
+      transform: translateY(6px);
     }
     to {
       opacity: 1;
@@ -298,7 +302,7 @@ body {
   }
 
   .animate-fade-in {
-    animation: fade-in 0.25s ease-out;
+    animation: fade-in 0.35s cubic-bezier(0.32, 0.72, 0, 1);
   }
 
   @keyframes fade-in {
@@ -310,8 +314,9 @@ body {
 
   .filter-chip {
     @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-2xs font-semibold
-           transition-all duration-200 cursor-pointer select-none;
+           cursor-pointer select-none;
     border: 1px solid transparent;
+    transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
   }
 
   .filter-chip[data-active="true"] {
@@ -326,18 +331,19 @@ body {
 
   .filter-chip:hover {
     opacity: 1;
-    transform: translateY(-1px);
+    transform: translateY(-0.5px);
   }
 
   .filter-chip:active {
-    transform: scale(0.96);
+    transform: scale(0.97);
   }
 
   /* ─── Export menu ──────────────────────────────────────────────────── */
 
   .export-menu-item {
     @apply flex items-center gap-2.5 w-full px-3 py-2 text-xs text-figma-text
-           hover:bg-figma-bg-hover cursor-pointer transition-colors rounded-md mx-0;
+           hover:bg-figma-bg-hover cursor-pointer rounded-md mx-0;
+    transition: background-color 0.2s cubic-bezier(0.32, 0.72, 0, 1);
   }
 
   /* ─── Section header ───────────────────────────────────────────────── */
@@ -349,9 +355,9 @@ body {
   /* ─── Custom toggle switch ─────────────────────────────────────────── */
 
   .toggle-switch {
-    @apply relative inline-flex items-center h-5 w-9 rounded-full cursor-pointer
-           transition-colors duration-200;
+    @apply relative inline-flex items-center h-5 w-9 rounded-full cursor-pointer;
     background-color: var(--figma-color-bg-tertiary);
+    transition: background-color 0.3s cubic-bezier(0.32, 0.72, 0, 1);
   }
 
   .toggle-switch[data-checked="true"] {
@@ -359,8 +365,9 @@ body {
   }
 
   .toggle-switch .toggle-thumb {
-    @apply absolute w-3.5 h-3.5 rounded-full bg-white transition-transform duration-200;
+    @apply absolute w-3.5 h-3.5 rounded-full bg-white;
     left: 3px;
+    transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
   }
 
   .toggle-switch[data-checked="true"] .toggle-thumb {
@@ -373,7 +380,7 @@ body {
     @apply rounded-full;
     border: 2px solid var(--figma-color-bg-tertiary);
     border-top-color: var(--figma-color-bg-brand);
-    animation: spin 0.7s linear infinite;
+    animation: spin 0.8s cubic-bezier(0.4, 0.15, 0.6, 0.85) infinite;
   }
 
   @keyframes spin {
@@ -387,7 +394,7 @@ body {
   }
 
   .circular-progress-bar {
-    transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: stroke-dashoffset 1.2s cubic-bezier(0.32, 0.72, 0, 1);
     transform: rotate(-90deg);
     transform-origin: center;
   }
@@ -409,7 +416,7 @@ body {
     user-select: none;
     touch-action: none;
     opacity: 0.5;
-    transition: opacity 0.15s;
+    transition: opacity 0.3s cubic-bezier(0.32, 0.72, 0, 1);
   }
 
   .resize-handle:hover {

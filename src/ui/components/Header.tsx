@@ -32,7 +32,7 @@ export function Header({ onTabChange }: HeaderProps) {
           className="btn-ghost p-1.5 rounded-lg"
           title="Help"
           onClick={() =>
-            window.open('https://github.com/figxed/figxed-plugin', '_blank')
+            window.open('https://github.com/johanvillalbab/Figxed-Design-System-Audit', '_blank')
           }
         >
           <HelpCircle size={14} className="text-figma-icon-secondary" />

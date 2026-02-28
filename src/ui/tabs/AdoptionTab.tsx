@@ -72,7 +72,7 @@ function LoadLibrarySection() {
 
   if (loadedLibrary) {
     return (
-      <motion.div layout transition={{ layout: { duration: 0.25, ease: [0.25, 0.1, 0.25, 1] } }}>
+      <motion.div layout transition={{ layout: { duration: 0.35, ease: [0.32, 0.72, 0, 1] } }}>
         <AnimatePresence mode="wait" initial={false}>
           {collapsed ? (
             <motion.div
@@ -80,7 +80,7 @@ function LoadLibrarySection() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
+              transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
             >
               <CollapsedLibraryRow
                 library={loadedLibrary}
@@ -94,7 +94,7 @@ function LoadLibrarySection() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
+              transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
             >
               <ExpandedLibrarySummary
                 library={loadedLibrary}
@@ -115,7 +115,7 @@ function LoadLibrarySection() {
       className="card relative overflow-hidden"
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+      transition={{ duration: 0.45, ease: [0.32, 0.72, 0, 1] }}
     >
       <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: 'linear-gradient(90deg, var(--figma-color-bg-component), var(--figma-color-bg-brand))' }} />
       <div className="flex items-start gap-3 pt-1">
@@ -475,7 +475,7 @@ function LibraryContentsList({ library }: { library: LoadedLibraryData }) {
               <motion.span
                 className="text-figma-text-tertiary shrink-0"
                 animate={{ rotate: isOpen ? 180 : 0 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
               >
                 <ChevronDown size={12} />
               </motion.span>
@@ -488,7 +488,7 @@ function LibraryContentsList({ library }: { library: LoadedLibraryData }) {
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                  transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
                   className="overflow-hidden"
                 >
                   <div className="border-t border-figma-border max-h-52 overflow-y-auto">

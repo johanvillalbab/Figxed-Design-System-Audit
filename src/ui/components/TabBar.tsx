@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ClipboardCheck, BarChart3, Settings } from 'lucide-react';
+import { ClipboardCheck, BarChart3, Settings, Library } from 'lucide-react';
 import type { TabId } from '../../types/common';
 
 interface TabBarProps {
@@ -11,6 +11,7 @@ interface TabBarProps {
 const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
   { id: 'adoption', label: 'Adoption', icon: <BarChart3 size={14} /> },
   { id: 'audit', label: 'Audit', icon: <ClipboardCheck size={14} /> },
+  { id: 'libraries', label: 'Libraries', icon: <Library size={14} /> },
   { id: 'settings', label: 'Settings', icon: <Settings size={14} /> },
 ];
 
@@ -26,8 +27,8 @@ export function TabBar({ activeTab, onTabChange }: TabBarProps) {
               ${isActive ? 'text-figma-brand' : 'text-figma-text-secondary'}`}
             onClick={() => onTabChange(tab.id)}
             whileHover={{ backgroundColor: isActive ? 'transparent' : 'var(--figma-color-bg-hover)' }}
-            whileTap={{ scale: 0.97 }}
-            transition={{ duration: 0.15 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
           >
             {tab.icon}
             {tab.label}
@@ -38,8 +39,9 @@ export function TabBar({ activeTab, onTabChange }: TabBarProps) {
                 layoutId="tab-indicator"
                 transition={{
                   type: 'spring',
-                  stiffness: 500,
-                  damping: 35,
+                  stiffness: 350,
+                  damping: 30,
+                  mass: 0.8,
                 }}
               />
             )}

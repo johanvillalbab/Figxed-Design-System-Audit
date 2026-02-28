@@ -100,11 +100,12 @@ export function AuditTab() {
   const resolvedCount = fixedIssueIds.length + ignoredIssueIds.length;
 
   // ─── Handlers ─────────────────────────────────────────────────────────
+  const selectedPageIds = useStore((s) => s.selectedPageIds);
   const reAudit = useCallback(() => {
     const scope = lastAuditScope ?? 'page';
     setIsAuditing(true);
-    postToPlugin({ type: 'START_AUDIT', payload: { scope } });
-  }, [lastAuditScope, setIsAuditing]);
+    postToPlugin({ type: 'START_AUDIT', payload: { scope, pageIds: scope === 'pages' ? selectedPageIds : undefined } });
+  }, [lastAuditScope, setIsAuditing, selectedPageIds]);
 
   // ─── Loading state ────────────────────────────────────────────────────
   if (isAuditing) {
@@ -154,8 +155,9 @@ export function AuditTab() {
                 backgroundColor: 'color-mix(in srgb, var(--figma-color-bg-component) 8%, var(--figma-color-bg))',
                 color: 'var(--figma-color-bg-component)',
               }}
-              initial={{ opacity: 0, y: -4 }}
+              initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
             >
               <BookOpen size={12} className="shrink-0" />
               <span className="flex-1 min-w-0">
@@ -177,7 +179,7 @@ export function AuditTab() {
             className="flex items-center gap-3 text-2xs text-figma-text-secondary"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.2, duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
           >
             <span className="flex items-center gap-1">
               <Clock size={10} />
@@ -211,7 +213,8 @@ export function AuditTab() {
                     onClick={() => toggleCategoryFilter(cat)}
                     data-active={categoryFilters[cat]}
                     className={`filter-chip ${meta.chipClass}`}
-                    whileTap={{ scale: 0.93 }}
+                    whileTap={{ scale: 0.97 }}
+                    transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
                   >
                     {meta.icon}
                     {meta.label} {count}
@@ -235,7 +238,8 @@ export function AuditTab() {
                     onClick={() => toggleSeverityFilter(sev)}
                     data-active={severityFilters[sev]}
                     className={`filter-chip ${meta.chipClass}`}
-                    whileTap={{ scale: 0.93 }}
+                    whileTap={{ scale: 0.97 }}
+                    transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
                   >
                     {meta.icon}
                     {meta.label} {count}
@@ -249,7 +253,8 @@ export function AuditTab() {
                   onClick={toggleShowFixed}
                   className="filter-chip bg-figma-bg-secondary text-figma-text-tertiary"
                   data-active={showFixed}
-                  whileTap={{ scale: 0.93 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
                 >
                   {showFixed ? <Eye size={10} /> : <EyeOff size={10} />}
                   {showFixed ? 'Showing' : 'Hiding'} resolved
@@ -312,7 +317,7 @@ function AdoptionCircularProgress({ rate, color, size = 80 }: { rate: number; co
   const offset = circumference - (animated / 100) * circumference;
 
   useEffect(() => {
-    const timer = setTimeout(() => setAnimated(rate), 100);
+    const timer = setTimeout(() => setAnimated(rate), 200);
     return () => clearTimeout(timer);
   }, [rate]);
 
@@ -343,9 +348,9 @@ function AdoptionCircularProgress({ rate, color, size = 80 }: { rate: number; co
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <motion.span
           className="text-xl font-bold score-value"
-          initial={{ opacity: 0, scale: 0.5 }}
+          initial={{ opacity: 0, scale: 0.7 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3, type: 'spring', stiffness: 300, damping: 20 }}
+          transition={{ delay: 0.4, duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
         >
           {Math.round(rate)}%
         </motion.span>
@@ -368,16 +373,16 @@ function AdoptionScoreCard({ result }: { result: AdoptionResult }) {
       className="card border text-center py-4"
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35 }}
+      transition={{ duration: 0.45, ease: [0.32, 0.72, 0, 1] }}
     >
       <p className="section-label mb-2 truncate px-2">Adoption</p>
       <div className="flex flex-col items-center gap-2">
         <AdoptionCircularProgress rate={rate} color={info.color} />
         <motion.span
           className="badge score-badge"
-          initial={{ opacity: 0, scale: 0.8 }}
+          initial={{ opacity: 0, scale: 0.85 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: 0.6, duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
         >
           {info.label}
         </motion.span>
@@ -403,9 +408,9 @@ function AdoptionBreakdown({ result }: { result: AdoptionResult }) {
   return (
     <motion.div
       className="rounded-lg border border-figma-border bg-figma-bg p-3 space-y-2.5"
-      initial={{ opacity: 0, y: 4 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.15 }}
+      transition={{ delay: 0.1, duration: 0.45, ease: [0.32, 0.72, 0, 1] }}
     >
       <p className="section-label">Adoption Breakdown</p>
 
@@ -440,7 +445,7 @@ function AdoptionBreakdown({ result }: { result: AdoptionResult }) {
                   style={{ backgroundColor: color }}
                   initial={{ width: 0 }}
                   animate={{ width: `${pct}%` }}
-                  transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1], delay: 0.2 }}
+                  transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1], delay: 0.25 }}
                 />
               </div>
             </div>
@@ -546,10 +551,10 @@ function ExportMenu({ auditResult }: { auditResult: import('../../types/audit').
           <motion.div
             className="absolute bottom-full left-0 mb-1.5 w-full bg-figma-bg border border-figma-border rounded-xl z-10 py-1.5 overflow-hidden"
             style={{}}
-            initial={{ opacity: 0, y: 4, scale: 0.96 }}
+            initial={{ opacity: 0, y: 6, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 4, scale: 0.96 }}
-            transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
+            exit={{ opacity: 0, y: 4, scale: 0.97 }}
+            transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
           >
             <button className="export-menu-item" onClick={() => handleExport('json')}>
               <FileJson size={13} /> JSON
